@@ -27,7 +27,7 @@ Toolkit(ten)s documents one machine's agent setup as a kit you can carry: plugin
 **What rides in the kit**
 
 - **3 plugins** — [caveman][cav] (terse mode + focused fix workflows), [ponytail][pony] (shortest working path), [mattpocock-skills][mp] (grilling, TDD, review, planning)
-- **11 standalone skills** — cherry-picked from [affaan-m/ECC][ecc], [awesome-copilot][gh] and [karpathy-skills][karp] via the `skills` CLI
+- **12 standalone skills** — cherry-picked from [affaan-m/ECC][ecc], [awesome-copilot][gh] and [karpathy-skills][karp] via the `skills` CLI
 - **4 MCP servers** — [codebase-memory-mcp][cbm] (code graph), [context7][c7] (version-matched docs), [firecrawl][fc] (web research), [playwright][pw] (browser control)
 - **1 debug kit** — troubleshooting skills this repo carries in `.claude/skills/`
 

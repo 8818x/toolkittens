@@ -68,6 +68,7 @@ Global store at `~/.agents/skills/` tracked by `.skill-lock.json`. Claude uses s
 | `continuous-learning-v2` | [affaan-m/ECC][ecc] | Capture session patterns as instincts — the bundled hooks/scripts do not auto-register, so invoke it manually |
 | `architecture-decision-records` | [affaan-m/ECC][ecc] | Log architecture decisions as ADRs automatically |
 | `strategic-compact` | [affaan-m/ECC][ecc] | Compact long sessions at phase boundaries |
+| `github-ops` | [affaan-m/ECC][ecc] | GitHub operations via `gh`: PR management, issue triage, releases, CI status, stale sweeps |
 | `create-readme` | [github/awesome-copilot][gh] | Generate a project README |
 | `karpathy-guidelines` | [multica-ai/andrej-karpathy-skills][karp] | Keep code simple, readable and verifiable |
 
@@ -165,6 +166,7 @@ codex mcp add <name> --env KEY=VALUE -- <command>
 | [`create-readme`][gh] | New repo needs a README |
 | [`karpathy-guidelines`][karp] | Standing style guard — always on, no invocation needed |
 | [`ask-matt`][mp] | Router — "which of these skills fits my situation?" |
+| [`github-ops`][ecc] | GitHub operations beyond commit-push: PRs, issue triage, releases, CI, stale sweeps via `gh` |
 | [`wait-what`][mp] | Last answer did not land — force a re-pitch |
 | [`to-questionnaire`][mp] | Turn an unanswerable decision into a questionnaire |
 | [`writing-for-agents`][mp] | When writing or editing skills / AGENTS.md |
