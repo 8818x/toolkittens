@@ -62,6 +62,7 @@ Global store at `~/.agents/skills/` tracked by `.skill-lock.json`. Claude uses s
 | `orch-add-feature` | [affaan-m/ECC][ecc] | Full feature pipeline: research, plan, TDD, review, gated commit |
 | `orch-change-feature` | [affaan-m/ECC][ecc] | Change an existing feature: update tests to the new spec, change impl, review + gated commit |
 | `orch-fix-defect` | [affaan-m/ECC][ecc] | Full bug cycle: reproduce as a failing test, fix to green, review + gated commit |
+| `orch-pipeline` | [affaan-m/ECC][ecc] | Shared engine behind the `orch-*` family: gated Research-Plan-TDD-Review-Commit pipeline, size classifier, agent map. Not invoked directly |
 | `product-capability` | [affaan-m/ECC][ecc] | Turn design intent / roadmap into a capability plan exposing constraints, invariants and open questions |
 | `santa-method` | [affaan-m/ECC][ecc] | Two independent reviewers must both approve before shipping (307-line procedure, fully self-contained) |
 | `security-review` | [affaan-m/ECC][ecc] | Audit auth, input, secrets, APIs and sensitive data (includes a cloud-infrastructure checklist) |
