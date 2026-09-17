@@ -12,7 +12,7 @@ This repository is a **field kit**: the plugins, skills and MCP servers I carry 
 
 > [!NOTE]
 > A snapshot of one machine — not an installer or dotfiles.  
-> Last reviewed: **2026-09-17**
+> Last reviewed: **2026-09-18**
 
 ## Overview
 
@@ -41,17 +41,18 @@ codex mcp list
 |---|---|---|
 | [`caveman`][cav] | Claude + Codex | Terse replies plus focused workflows: `investigate-first`, `surgical-patch`, `safe-refactor`, `migration`, `lean-build`, `verify-and-stop` |
 | [`ponytail`][pony] | Claude + Codex | Forces the shortest working path: YAGNI, stdlib first, no over-engineering |
-| [`mattpocock-skills`][mp] | Claude + Codex | `grilling`, `grill-with-docs` (grilling + ADRs/glossary as you go), `tdd`, `code-review`, `research`, `prototype`, `handoff` (conversation → handoff doc for another agent), `to-spec` / `to-tickets` (discussion → spec / blocker-linked tickets), `wayfinder` (plan work bigger than one session), `improve-codebase-architecture` (deepening scan + HTML report), `wizard` (interactive walk-throughs for human-only steps), `triage`, `domain-modeling` |
+| [`mattpocock-skills`][mp] | Claude + Codex | `grilling`, `grill-with-docs`, `tdd`, `code-review`, `research`, `prototype`, `handoff`, `to-spec` / `to-tickets`, `wayfinder`, `improve-codebase-architecture`, `wizard`, `triage`, `domain-modeling` |
+| [`ecc`][ecc] | Claude + Codex | The full agent-harness system v2.2.1: ~280 skills, ~88 agents (`ecc:planner`, `ecc:tdd-guide`, `ecc:code-reviewer`, per-language reviewers, GAN harness), commands (`/ecc:pr`, `/ecc:build-fix`, `/ecc:learn`), and lifecycle hooks |
 
 ```bash
 claude plugin update <name>@<marketplace>
 ```
 
 > [!NOTE]
-> Skill names in this doc are shown bare for readability — the link after each name tells you where it lives. When invoking for real: plugin skills need their plugin prefix (`caveman:`, `mattpocock-skills:`, `ponytail:`); standalone skills are called by bare name.
+> Skill names in this doc are shown bare for readability — the link after each name tells you where it lives. When invoking for real: plugin skills need their plugin prefix (`caveman:`, `mattpocock-skills:`, `ponytail:`, `ecc:`); standalone skills are called by bare name.
 
 > [!WARNING]
-> Do **not** install `ecc@ecc` as a whole bundle — ~300 skills blew the context budget and broke skill routing. Only cherry-picked pieces live in this kit (see standalone skills).
+> **History — why ECC went full-bundle.** The first attempt installed `ecc@ecc` alongside 13 cherry-picked ECC standalone skills: skills budget overflowed, the system stripped skill descriptions and routing broke. The reset wiped every standalone skill and the stale plugin caches first, then installed the plugin alone — that combination holds. Lesson: the budget pays for the *whole* load, so adding ECC means not stacking duplicate skills from the same source.
 
 ### Standalone skills
 
@@ -59,22 +60,10 @@ Global store at `~/.agents/skills/` tracked by `.skill-lock.json`. Claude uses s
 
 | Skill | Source | Use when |
 |---|---|---|
-| `orch-add-feature` | [affaan-m/ECC][ecc] | Full feature pipeline: research, plan, TDD, review, gated commit |
-| `orch-change-feature` | [affaan-m/ECC][ecc] | Change an existing feature: update tests to the new spec, change impl, review + gated commit |
-| `orch-fix-defect` | [affaan-m/ECC][ecc] | Full bug cycle: reproduce as a failing test, fix to green, review + gated commit |
-| `orch-pipeline` | [affaan-m/ECC][ecc] | Shared engine behind the `orch-*` family: gated Research-Plan-TDD-Review-Commit pipeline, size classifier, agent map. Not invoked directly |
-| `product-capability` | [affaan-m/ECC][ecc] | Turn design intent / roadmap into a capability plan exposing constraints, invariants and open questions |
-| `santa-method` | [affaan-m/ECC][ecc] | Two independent reviewers must both approve before shipping (307-line procedure, fully self-contained) |
-| `security-review` | [affaan-m/ECC][ecc] | Audit auth, input, secrets, APIs and sensitive data (includes a cloud-infrastructure checklist) |
-| `continuous-learning-v2` | [affaan-m/ECC][ecc] | Capture session patterns as instincts — the bundled hooks/scripts do not auto-register, so invoke it manually |
-| `architecture-decision-records` | [affaan-m/ECC][ecc] | Log architecture decisions as ADRs automatically |
-| `strategic-compact` | [affaan-m/ECC][ecc] | Compact long sessions at phase boundaries |
-| `github-ops` | [affaan-m/ECC][ecc] | GitHub operations via `gh`: PR management, issue triage, releases, CI status, stale sweeps |
 | `create-readme` | [github/awesome-copilot][gh] | Generate a project README |
-| `karpathy-guidelines` | [multica-ai/andrej-karpathy-skills][karp] | Keep code simple, readable and verifiable |
+| `karpathy-guidelines` | [multica-ai/andrej-karpathy-skills][karp] | Keep code simple, readable and verifiable — standing style guard |
 
-> [!WARNING]
-> The `orch-*` pipelines were designed to delegate each phase to ECC agents (`ecc:planner`, `ecc:code-reviewer`, ...). Those agents are **not installed** — the bundle was rejected — so every phase runs inside the main session instead. The sequence and gates still hold; the parallelism does not.
+Only what ECC does not ship. Everything else (orch pipelines, santa-method, security-review, ADRs, learning, strategic-compact, github-ops equivalents) now arrives via the `ecc:` plugin namespace.
 
 ```bash
 npx skills add <owner>/<repo> --skill <name> -g
@@ -118,21 +107,22 @@ codex mcp add <name> --env KEY=VALUE -- <command>
 
 | Job | Pipeline |
 |---|---|
-| New feature (medium+) | [`orch-add-feature`][ecc] — research, plan, TDD, review, gated commit built in |
+| New feature (medium+) | [`orch-add-feature`][ecc] — gated Research-Plan-TDD-Review-Commit, phases delegated to `ecc:` agents |
 | Change an existing feature | [`orch-change-feature`][ecc] |
 | Small bug / cause already narrow | [`investigate-first`][cav] then [`surgical-patch`][cav] |
 | Critical or recurring bug | [`orch-fix-defect`][ecc] (regression test included) |
+| Build broken | [`build-fix`][ecc] — routes to the per-language build resolver agent |
 | Behavior-preserving refactor | [`safe-refactor`][cav] |
 | Feature at risk of scope creep | [`lean-build`][cav] |
 | Migration needing rollback | [`migration`][cav] |
 | Work too big for one session | [`wayfinder`][mp] — decision-ticket map, resolve one at a time |
-| Issue / PR backlog piling up | [`triage`][mp] — categorise, verify, write agent-ready briefs |
+| Issue / PR backlog piling up | [`triage`][mp] · [`github-ops`][ecc] for `gh` operations |
 | Designing a module's interface or seam | [`codebase-design`][mp] · [`domain-modeling`][mp] (CONTEXT.md + domain model) |
 | Setup only a human can do (CI secrets, provisioning) | [`wizard`][mp] — generates a guided walk-through |
 | Tiny task | Do it directly, [`ponytail`][pony] keeps scope honest |
 
 > [!TIP]
-> For medium-and-up work let the `orch-*` pipeline drive. Do not call [`tdd`][mp] separately — the pipeline already runs test-first.
+> For medium-and-up work let the `orch-*` pipeline drive. Do not call [`tdd`][mp] separately — the pipeline already runs test-first via `ecc:tdd-guide`.
 
 ### 3. While working (every lane)
 
@@ -150,12 +140,12 @@ codex mcp add <name> --env KEY=VALUE -- <command>
 3. [`santa-method`][ecc] for critical work
 4. [`security-review`][ecc] when touching auth, input or secrets
 5. [`verify-and-stop`][cav] as the final gate
-6. Open the PR following the repository's workflow
+6. [`pr`][ecc] — templated PR from unpushed commits
 
 ### 5. End of session
 
 - [`handoff`][mp] — compress the conversation into a handoff doc another agent (or Codex) can pick up
-- [`continuous-learning-v2`][ecc] captures patterns as instincts
+- [`learn`][ecc] captures patterns as instincts (hooks now auto-register via the plugin)
 
 ### 6. The rest of the kit (situational)
 
@@ -167,10 +157,10 @@ codex mcp add <name> --env KEY=VALUE -- <command>
 | [`create-readme`][gh] | New repo needs a README |
 | [`karpathy-guidelines`][karp] | Standing style guard — always on, no invocation needed |
 | [`ask-matt`][mp] | Router — "which of these skills fits my situation?" |
-| [`github-ops`][ecc] | GitHub operations beyond commit-push: PRs, issue triage, releases, CI, stale sweeps via `gh` |
 | [`wait-what`][mp] | Last answer did not land — force a re-pitch |
 | [`to-questionnaire`][mp] | Turn an unanswerable decision into a questionnaire |
 | [`writing-for-agents`][mp] | When writing or editing skills / AGENTS.md |
+| [`ecc-guide`][ecc] | Tour of everything ECC ships — agents, commands, hooks |
 
 ## Repo conventions
 
@@ -186,17 +176,18 @@ Create only the files a project actually needs, filled with that project's real 
 
 ## Gotchas
 
-1. **One MCP process per session** — close unused Zed tabs to avoid orphaned processes. Check with:
+1. **One MCP process per session** — close unused Zed tabs to avoid orphaned processes. Codex multi-agent threads leak `codebase-memory-mcp.exe` instances; sweep periodically:
 
    ```powershell
    Get-CimInstance Win32_Process -Filter "Name = 'codebase-memory-mcp.exe'" |
      Select-Object ProcessId, ParentProcessId, CreationDate
    ```
 
-2. **Skills budget is finite** — plugins bundling hundreds of skills get truncated and routing breaks.
-3. **Git Bash rewrites paths** — prefix `MSYS_NO_PATHCONV=1` when an argument starting with `/` must survive intact.
-4. **Windows PowerShell 5.1 lacks `&&`** — use `;`, PowerShell 7 or Git Bash.
-5. **API keys sit in plaintext** in `~/.claude.json` and `~/.codex/config.toml`.
+2. **Skills budget is finite** — the full ECC load fits only because nothing duplicates it. Before adding another big plugin or standalone skill, check the load does not return the `Exceeded skills context budget` warning.
+3. **ECC hooks gate Bash** — GateGuard demands a stated purpose before first Bash and before destructive commands. State facts, retry; for repair work `ECC_GATEGUARD=off` exists (use sparingly).
+4. **Git Bash rewrites paths** — prefix `MSYS_NO_PATHCONV=1` when an argument starting with `/` must survive intact.
+5. **Windows PowerShell 5.1 lacks `&&`** — use `;`, PowerShell 7 or Git Bash.
+6. **API keys sit in plaintext** in `~/.claude.json` and `~/.codex/config.toml`.
 
 > [!CAUTION]
 > Before sharing any config, strip tokens, API keys, private endpoints and user-identifying paths.
@@ -208,6 +199,7 @@ Create only the files a project actually needs, filled with that project's real 
 ~/.claude/rules/                  MCP selection, orchestration, skill routing
 ~/.claude/projects/<proj>/memory  durable per-project memory
 ~/.claude/plugins/cache/          installed plugins
+~/.claude/skills/learned/         instinct output of ecc:learn
 ~/.codex/config.toml              Codex plugins, MCP, sandbox and hooks
 ~/.agents/skills/                 central standalone-skill store
 ```

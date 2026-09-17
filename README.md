@@ -10,11 +10,11 @@
 
 </div>
 
-Toolkit(ten)s documents one machine's agent setup as a kit you can carry: plugins, hand-picked skills and MCP servers wired identically into **Claude Code** and **Codex** (driven through Zed), so work swaps agents without re-learning anything.
+Toolkit(ten)s documents one machine's agent setup as a kit you can carry: plugins, skills and MCP servers wired identically into **Claude Code** and **Codex** (driven through Zed), so work swaps agents without re-learning anything.
 
 > [!NOTE]
 > A snapshot of a real machine — not an installer or dotfiles.  
-> Last reviewed: **2026-09-17**
+> Last reviewed: **2026-09-18**
 
 ## Overview
 
@@ -26,8 +26,8 @@ Toolkit(ten)s documents one machine's agent setup as a kit you can carry: plugin
 
 **What rides in the kit**
 
-- **3 plugins** — [caveman][cav] (terse mode + focused fix workflows), [ponytail][pony] (shortest working path), [mattpocock-skills][mp] (grilling, TDD, review, planning)
-- **13 standalone skills** — cherry-picked from [affaan-m/ECC][ecc], [awesome-copilot][gh] and [karpathy-skills][karp] via the `skills` CLI
+- **4 plugins** — [caveman][cav] (terse mode + focused fix workflows), [ponytail][pony] (shortest working path), [mattpocock-skills][mp] (grilling, TDD, review, planning), [ECC][ecc] (full harness: ~280 skills, ~88 agents, gated pipelines, `/ecc:` commands, lifecycle hooks)
+- **2 standalone skills** — [create-readme][gh] and [karpathy-guidelines][karp] via the `skills` CLI, the only picks ECC does not ship
 - **4 MCP servers** — [codebase-memory-mcp][cbm] (code graph), [context7][c7] (version-matched docs), [firecrawl][fc] (web research), [playwright][pw] (browser control)
 - **1 debug kit** — troubleshooting skills this repo carries in `.claude/skills/`
 
@@ -44,15 +44,15 @@ The short version — full lanes and pipelines in [AGENT-SETUP.md](AGENT-SETUP.m
 
 ```
 1. Pick a lane      grilling · product-capability · prototype · research
-2. Pick a pipeline  orch-add/change/fix · safe-refactor · lean-build · wayfinder
+2. Pick a pipeline  orch-add/change/fix (ecc: agents) · safe-refactor · lean-build · wayfinder
 3. While working    codebase-memory before grep · context7 before APIs
-4. Before shipping  code-review → santa-method → security-review → verify-and-stop
-5. End of session   handoff (→ Codex) · continuous-learning
+4. Before shipping  code-review → santa-method → security-review → verify-and-stop → /ecc:pr
+5. End of session   handoff (→ Codex) · /ecc:learn
 ```
 
 ## Gotchas
 
-The machine-specific traps (MCP process leaks, skills budget, Windows path quirks) live in [AGENT-SETUP.md](AGENT-SETUP.md#gotchas).
+The machine-specific traps (MCP process leaks, skills budget, ECC hook gates, Windows path quirks) live in [AGENT-SETUP.md](AGENT-SETUP.md#gotchas).
 
 > [!CAUTION]
 > Config files referenced by this kit contain plaintext API keys. Never share `~/.claude.json` or `~/.codex/config.toml`.
